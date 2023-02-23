@@ -1,0 +1,18 @@
+{
+  "name": "whatsPlayingServer",
+  "version": "1.0.0",
+  "description": "server component for whatsPlaying",
+  "homepage": "https://github.com/gregtbrown/whatsPlaying",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "Greg Brown",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "@hapi/hapi": "^21.1.0",
+    "@hapi/inert": "^7.0.0",
+    "request": "^2.88.2"
+  }
+}

@@ -1,0 +1,134 @@
+<!--
+/* ***********************************************
+ * whatsPlaying
+ * Copyright (C) Greg Brown, All rights reserved.
+ * https://github.com/gregtbrown/whatsPlaying
+ * ***********************************************/
+-->
+
+<!doctype html>
+<html>
+ <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>whatsPlaying Login</title>
+
+    <style type="text/css">
+
+       :root {
+           --titleFontSize: 10vw;
+           --btnMinWidth: 50vw;
+           --btnFontSize: 5vw;
+       }
+
+       @media (aspect-ratio > 1/1) {
+           :root {
+               --titleFontSize: 10vh;
+               --btnMinWidth: 50vh;
+               --btnFontSize: 5vh;
+           }
+       }
+
+      * {
+          font-family: sans-serif;
+          box-sizing: border-box;
+          -moz-box-sizing: border-box;
+          padding: 0;
+          margin: 0;
+          color: black;
+      }
+
+      html, body {
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+          background-color: white;
+      }
+
+      .title {
+          margin: 0.8em;
+          font-size: var(--titleFontSize);
+          text-align: center;
+      }
+
+      .button {
+          display: flex;
+          justify-content: center;
+          min-width: var(--btnMinWidth);
+          margin: 1em auto;
+          padding: 0.5em 1em 0.5em 1em;
+          background-color: #777;
+          color: white;
+          border: 0.1em solid #555;
+          border-radius: 0.3em;
+          font-size: var(--btnFontSize);
+          text-align: center;
+      }
+
+      .button:enabled {
+          background-color: #22d;
+          border: 0.1em solid #11c;
+          cursor: pointer;
+      }
+
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+       <div class="title">whatsPlaying</div>
+       <button id="login" class="button" onclick="uiCmd('login')">Log in with Spotify</button>
+       <button id="logout" class="button" onclick="uiCmd('logout');">Logout</button>
+       <button id="wakeup" class="button" onclick="uiCmd('wakeup');">Wake Up</button>
+    </div>
+  </body>
+
+  <script>
+
+     // get everything started
+     window.addEventListener('load', initialize, true);
+
+     function initialize() {
+       updateUi();
+     }
+
+     async function uiCmd(cmd) {
+       console.log(`uiCmd(${cmd})`);
+       if (cmd === 'login') {
+         location.href = '/login';
+       } else if (cmd === 'logout') {
+         await serverPut('/logout');
+         updateUi();
+       } else if (cmd === 'wakeup') {
+         await serverPut('/setwake');
+         updateUi();
+       }
+     }
+
+     async function updateUi() {
+       var loggedIn = await serverGet('/islogin');
+       var asleep = await serverGet('/shouldwake');  // TODO: not going to change here dynamically when the app goes to sleep
+
+       document.getElementById('login').disabled = loggedIn;
+       document.getElementById('logout').disabled = !loggedIn;
+       document.getElementById('wakeup').disabled = asleep;
+     }
+
+     async function serverGet(route) {
+       var res = await server('GET', route);
+       if (res.status == 200)
+         return await res.json();
+       return null;
+     }
+
+     async function serverPut(route) {
+       var res = await server('PUT', route);
+       return res.status == 200;
+     }
+
+     async function server(type, route) {
+       var res = await fetch(route, {method: type, headers: {'Content-Type': 'application/json'}});
+       return res;
+     }
+
+  </script>
+</html>

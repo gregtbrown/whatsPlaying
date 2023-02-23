@@ -1,0 +1,316 @@
+<!--
+/* ***********************************************
+ * whatsPlaying
+ * Copyright (C) Greg Brown, All rights reserved.
+ * https://github.com/gregtbrown/whatsPlaying
+ * ***********************************************/
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+   <title>whatsPlaying</title>
+   <script src="myconfig.js"></script>
+   <script src="whatsPlaying.js"></script>
+
+   <style>
+      * {
+          font-family: sans-serif;
+          box-sizing: border-box;
+          -moz-box-sizing: border-box;
+          padding: 0;
+          margin: 0;
+          color: #eee;
+      }
+
+      html, body {
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+          background-color: black;
+          cursor: none;
+      }
+
+      table {
+          border-collapse: collapse;
+      }
+
+      @-webkit-keyframes fadeIn {
+          from {opacity: 0;}
+          to {opacity: 1;}
+      }
+
+      @keyframes fadeIn {
+          from {opacity: 0;}
+          to {opacity: 1;}
+      }
+
+      @-webkit-keyframes fadeOut {
+          from {opacity: 1;}
+          to {opacity: 0;}
+      }
+
+      @keyframes fadeOut {
+          from {opacity: 1;}
+          to {opacity: 0;}
+      }
+
+      .screen {
+      }
+
+      .screenOn {
+          display: block;
+          -webkit-animation: fadeIn 1.0s;
+          animation: fadeIn 1.0s;
+          width: 100vw;
+          height: 88vh;
+          padding: 3vh 4vw 3vh 4vw;
+      }
+
+      .screenOff {
+          display: none;
+      }
+
+      .container {
+          display: flex;
+          flex-direction: column;
+          justify-content: space-around;
+          align-items: center;
+      }
+
+      .titleBar {
+          height: 12vh;
+          font-size: 3.26vh;
+      }
+
+      .title {
+          padding-top: .8em;
+          font-size: 3.26vh;
+      }
+
+      .clock {
+          float: right;
+          position: absolute;
+          top: 0;
+          right: 0;
+          padding: 0.8em;
+          font-size: 3.26vh;
+      }
+
+      .logo {
+          float: left;
+          position: absolute;
+          top: 0;
+          left: 0;
+          margin: 0.8em;
+          height: 4.56vh;
+      }
+
+      .screenContent {
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+          justify-content: center;
+          text-align: center;
+      }
+
+      .loginContent {
+          font-size: 4.56vh;
+      }
+
+      .errorContent {
+          font-size: 4.56vh;
+      }
+
+      .sleepTitle {
+          font-size: 7.81vh;
+          margin-bottom: .8em;
+      }
+
+      .sleepContent {
+          font-size: 3.26vh;
+      }
+
+      .playingContent {
+          display: flex;
+          flex-direction: row;
+          /* gap: 1em; */
+          justify-content: center;
+          align-items: center;
+      }
+    
+      .playingAlbumImage {
+          flex: 1 1 50%;
+          opacity: 0; /* hide until there is an image but retain screen space */
+          min-width: 25vh;
+          max-width: 74vh;
+          min-height: 25vh;
+          max-height: 74vh;
+          border: 0.13vh solid #777;
+          box-shadow: 0.52vh 0.52vh 1.30vh -0.26vh rgb(255 255 255 / 50%);
+      }
+
+      .playingInfo {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          margin-left: 2em;
+          justify-content: center;
+          flex: 1 1 50%;
+          font-size: 3.26vh;
+          font-weight: normal;
+          text-align: center;
+      }
+
+      .playingItem {
+          margin: 0.3em;
+          /* transition: 0.25s ease-in-out; */
+      }
+
+      .playingTrack {
+          font-size: 4.56vh;
+      }
+
+      .playingAlbum {
+      }
+
+      .playingArtist {
+      }
+
+      .playingDate {
+          font-size: 1.95vh;
+      }
+
+      .playingPlaylist {
+          position: absolute;
+          bottom: 0;
+          margin: 0 0 1em 0;
+          font-size: 3.26vh;
+      }
+
+      .playingMeter {
+          opacity: 0; /* hide until we're playing but retain screen space */
+          height: 1.30vh;
+          width: 100%;
+          margin-top: 4em;
+          background: black;
+          border: 0.13vh solid #333;
+          border-radius: 0.65vh;
+      }
+
+      .playingMeter > span {
+          display: block;
+          height: 100%;
+          background: #777;
+          border: 0.13vh solid #444;
+          border-radius: 0.52vh;
+      }
+
+      .playingControls {
+          display: none; /* hidden until we need it */
+          width: 14em;
+          margin-top: 2em;
+          padding: 0.5em;
+          border: 0.26vh solid #333;
+          border-radius: 1em;
+      }
+
+      .playingControl {
+          display: inline-block;
+          margin: 0 1em 0 1em;
+      }
+
+      .playingControl svg {
+          width: 2em;
+          height: 2em;
+          fill: white;
+      }
+
+   </style>
+</head>
+
+<body id="body">
+
+    <svg display="none" width="0" height="0" xmlns="http://www.w3.org/2000/svg">
+       <defs>
+          <symbol id="iconPlay" viewBox="0 0 1792 1792">
+             <path d="M1576 927l-1328 738q-23 13-39.5 3t-16.5-36v-1472q0-26 16.5-36t39.5 3l1328 738q23 13 23 31t-23 31z"/>
+          </symbol>
+          <symbol id="iconPause" viewBox="0 0 1792 1792">
+             <path d="M1664 192v1408q0 26-19 45t-45 19h-512q-26 0-45-19t-19-45v-1408q0-26 19-45t45-19h512q26 0 45 19t19 45zm-896 0v1408q0 26-19 45t-45 19h-512q-26 0-45-19t-19-45v-1408q0-26 19-45t45-19h512q26 0 45 19t19 45z"/>
+          </symbol>
+          <symbol id="iconNext" viewBox="0 0 1792 1792">
+             <path d="M109 1651q-19 19-32 13t-13-32v-1472q0-26 13-32t32 13l710 710q9 9 13 19v-710q0-26 13-32t32 13l710 710q19 19 19 45t-19 45l-710 710q-19 19-32 13t-13-32v-710q-4 10-13 19z"/>
+          </symbol>
+          <symbol id="iconPrev" viewBox="0 0 1792 1792">
+             <path d="M1683 141q19-19 32-13t13 32v1472q0 26-13 32t-32-13l-710-710q-9-9-13-19v710q0 26-13 32t-32-13l-710-710q-19-19-19-45t19-45l710-710q19-19 32-13t13 32v710q4-10 13-19z"/>
+          </symbol>
+          <symbol id="iconMusic" viewBox="0 0 1792 1792">
+             <path d="M1664 224v1120q0 50-34 89t-86 60.5-103.5 32-96.5 10.5-96.5-10.5-103.5-32-86-60.5-34-89 34-89 86-60.5 103.5-32 96.5-10.5q105 0 192 39v-537l-768 237v709q0 50-34 89t-86 60.5-103.5 32-96.5 10.5-96.5-10.5-103.5-32-86-60.5-34-89 34-89 86-60.5 103.5-32 96.5-10.5q105 0 192 39v-967q0-31 19-56.5t49-35.5l832-256q12-4 28-4 40 0 68 28t28 68z"/></svg>       </defs>
+          </symbol>
+       </defs>
+    </svg>
+
+    <div class="container">
+        <div class="titleBar">
+           <div class="title">whatsPlaying</div>
+           <div id=clock class="clock"></div>
+           <img id="logo" class="logo" src="Spotify_Logo_RGB_White.png"></img>
+        </div>
+
+        <div id="loginScreen" class="screen screenOff">
+           <div class="screenContent">
+              <div id="loginContent" class="loginContent"></div>
+           </div>
+        </div>
+
+        <div id="errorScreen" class="screen screenOff">
+           <div class="screenContent">
+              <div id="errorContent" class="errorContent"></div>
+           </div>
+        </div>
+
+        <div id="idleScreen" class="screen screenOff">
+           <div class="screenContent">
+           </div>
+        </div>
+
+        <div id="sleepScreen" class="screen screenOff">
+           <div class="screenContent">
+              <div id="sleepTitle" class="sleepTitle">Zzzz...</div>
+              <div id="sleepContent" class="sleepContent"></div>
+           </div>
+        </div>
+
+        <div id="playingScreen" class="screen screenOff">
+           <div class="playingContent">
+              <img id="playingAlbumImage" class="playingAlbumImage"></img>
+              <div class="playingInfo">
+                 <div id="playingTrack" class="playingTrack playingItem"></div>
+                 <div id="playingArtist" class="playingArtist playingItem"></div>
+                 <div id="playingAlbum" class="playingAlbum playingItem"></div>
+                 <div id="playingDate" class="playingDate playingItem"></div>
+                 <div id="playingMeter" class="playingMeter playingItem">
+                    <span id="playingMeterValue"></span>
+                 </div>
+
+                 <div id="playingControls" class="playingControls playingItem">
+                    <div id="playingPrev" class="playingControl" onclick="uiCmd('prev');">
+                       <svg><use xlink:href="#iconPrev"/></svg>
+                    </div>
+                    <div id="playingPlay" class="playingControl" onclick="uiCmd('play');">
+                       <svg><use xlink:href="#iconPause"/></svg>
+                    </div>
+                    <div id="playingNext" class="playingControl" onclick="uiCmd('next');">
+                       <svg><use xlink:href="#iconNext"/></svg>
+                    </div>
+                 </div>
+              </div>
+           </div>
+
+           <div id="playingPlaylist" class="playingItem playingPlaylist"></div>
+        </div>
+    </div>
+
+</body>
+</html>
