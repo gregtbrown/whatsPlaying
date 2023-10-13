@@ -64,7 +64,7 @@ This app uses the Spotify developer API to get playback status on your account. 
 
 1. Open https://developer.spotify.com/dashboard and log in with your normal Spotify login credentials.
 2. Click `create an app`.
-3. Fill in the app name (recommended `whatsPlaying`) and an description (make something up), and click `create`
+3. Fill in the app name (recommended `whatsPlaying`) and a description (make something up), and click `create`
 4. Once in the app screen, click `edit settings`
 5. under `Redirect URIs` type `http://whatsPlaying:8000/spotifyRedirect/` and click `add`. DON'T FORGET THE SLASH AT THE END, this will cause you lots of headaches if you forget it.  Also, this field is CASE SENSITIVE, so enter carefully.  If you're going to be running this on a computer instead of a PI it would be `http://<your computer name>:8000/spotifyRedirect/`.  If you fail to set this up correctly, the login/control app will show `INVALID CLIENT: Invalid redirect URI` when you try to log in.
 
