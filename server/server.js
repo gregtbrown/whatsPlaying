@@ -236,15 +236,16 @@ function ensurePathExists(fileName) {
   FS.mkdirSync(dirName);
 }
 
-function readFile(fileName, allowFail) {
+function readFile(fileName, allowMissing) {
   var data = {};
-  try {
-    data = FS.readFileSync(fileName, 'utf8');
-    data = JSON.parse(data);
-  } catch(e) {
-    if (!allowFail)
+  if (!allowMissing || FS.existsSync(fileName)) {  // if the file doesn't exist, just return empty data instead of a failed read error
+    try {
+      data = FS.readFileSync(fileName, 'utf8');
+      data = JSON.parse(data);
+    } catch(e) {
       console.log(`Error reading file "${fileName}"\n${e.message}`);
-    data = {};
+      data = {};
+    }
   }
 
   return data;
