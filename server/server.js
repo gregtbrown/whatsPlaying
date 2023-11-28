@@ -227,13 +227,23 @@ function generateRandomString(length) {
   return text;
 };
 
-function readFile(fileName) {
+function ensurePathExists(fileName) {
+  var dirName = Path.dirname(fileName);
+  if (FS.existsSync(dirName)) {
+    return true;
+  }
+  ensurePathExists(dirName);
+  FS.mkdirSync(dirName);
+}
+
+function readFile(fileName, allowFail) {
   var data = {};
   try {
     data = FS.readFileSync(fileName, 'utf8');
     data = JSON.parse(data);
   } catch(e) {
-    console.log(`Error reading file "${fileName}"\n${e.message}`);
+    if (!allowFail)
+      console.log(`Error reading file "${fileName}"\n${e.message}`);
     data = {};
   }
 
@@ -251,12 +261,13 @@ function writeFile(fileName, data) {
 }
 
 function loadTokenInfo() {
-  var data = readFile(gFileName.token);
+  var data = readFile(gFileName.token, true);
   if ( data)
     gTokenInfo = data;
 }
 
 function saveTokenInfo() {
+  ensurePathExists(gFileName.token);
   writeFile(gFileName.token, gTokenInfo);
 }
 
